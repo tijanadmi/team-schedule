@@ -8,8 +8,6 @@ export default function Navigation({ onLinkClick, user = null }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const adminRef = useRef(null);
 
-  if (!user) return null; // ništa se ne prikazuje ako nije prijavljen
-
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
@@ -24,6 +22,8 @@ export default function Navigation({ onLinkClick, user = null }) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (!user) return null; // ništa se ne prikazuje ako nije prijavljen
 
   const navLinks = [
     {
