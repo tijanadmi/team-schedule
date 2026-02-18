@@ -1,3 +1,7 @@
+// src/app/api/dashboard-export/[year]/[month]/route.js
+
+export const revalidate = 0;
+
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import {
@@ -33,7 +37,9 @@ export async function GET(request, { params }) {
   });
 
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Dashboard");
+  const worksheet = workbook.addWorksheet(
+    `SRTS-${String(month).padStart(2, "0")}-${year}`,
+  );
 
   // =====================
   // HEADER
@@ -77,11 +83,13 @@ export async function GET(request, { params }) {
   worksheet.eachRow((row, rowNumber) => {
     row.eachCell((cell, colNumber) => {
       // preskoči prvu kolonu (ime zaposlenog)
-      if (colNumber === 1) return;
+      // if (colNumber === 1) return;
 
       const dayIndex = colNumber - 2; // jer prva kolona je zaposleni
       const day = days[dayIndex];
-      const dayOfWeek = new Date(year, month - 1, day).getDay();
+      // const dayOfWeek = new Date(year, month - 1, day).getDay();
+      const dayOfWeek =
+        colNumber > 1 ? new Date(year, month - 1, day).getDay() : null;
 
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
@@ -95,13 +103,25 @@ export async function GET(request, { params }) {
       }
 
       // DATA redovi
-      if (rowNumber > 1) {
+      // if (rowNumber > 1) {
+      //   const statusLabel = cell.value;
+
+      if (rowNumber > 1 && colNumber > 1) {
+        // nađi status po labeli
+        // const status = statuses.find((s) => s.label === statusLabel);
         const statusLabel = cell.value;
 
+        // if (status?.color_hex) {
+        //   cell.fill = {
+        //     type: "pattern",
+        //     pattern: "solid",
+        //     fgColor: {
+        //       argb: `FF${status.color_hex.replace("#", "")}`,
+        //     },
+        //   };
+        // }
         if (statusLabel) {
-          // nađi status po labeli
           const status = statuses.find((s) => s.label === statusLabel);
-
           if (status?.color_hex) {
             cell.fill = {
               type: "pattern",
@@ -130,11 +150,37 @@ export async function GET(request, { params }) {
         }
       }
 
+      // =========================
+      // ALIGNMENT
+      // =========================
+
       cell.alignment = {
         vertical: "middle",
         horizontal: "center",
         wrapText: true,
       };
+
+      // =========================
+      // BORDER
+      // =========================
+
+      if (rowNumber === 1) {
+        // ceo header red – jači border
+        cell.border = {
+          top: { style: "medium" },
+          left: { style: "medium" },
+          bottom: { style: "medium" },
+          right: { style: "medium" },
+        };
+      } else {
+        // ostali redovi – tanak
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      }
     });
   });
 
@@ -161,7 +207,7 @@ export async function GET(request, { params }) {
     headers: {
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename=dashboard-${year}-${month}.xlsx`,
+      "Content-Disposition": `attachment; filename=Evidencija_SRTS-${String(month).padStart(2, "0")}-${year}.xlsx`,
     },
   });
 }

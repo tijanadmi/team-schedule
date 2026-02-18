@@ -44,9 +44,11 @@ export default async function DashboardMonthPage({ params }) {
 
   return (
     <Layout>
-      <section className="bg-white text-gray-800 py-6 px-2 sm:px-6 lg:px-8">
+      {/* <section className="bg-white text-gray-800 py-6 px-2 sm:px-6 lg:px-8"> */}
+      <section className="bg-white text-gray-800 w-full min-h-screen pt-8 px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-4 mt-4 sm:mt-6 w-full">
+        {/* <div className="flex items-center justify-between mb-4 mt-4 sm:mt-6 w-full"> */}
+        <div className="flex items-center justify-between mb-6">
           <Link
             href={`/dashboard/${prev.year}/${prev.month}`}
             className="text-lg font-semibold  flex-shrink-0"
@@ -76,11 +78,15 @@ export default async function DashboardMonthPage({ params }) {
         </div>
 
         {/* TABLE WRAPPER */}
-        <div className="w-full overflow-x-auto overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md">
-          <table className="w-max sm:w-full border-collapse text-sm">
+        {/* <div className="w-full overflow-x-auto overflow-y-auto max-h-[70vh] border border-gray-200 rounded-md">
+          <table className="w-max sm:w-full border-collapse text-sm"> */}
+        {/* <div className="w-full overflow-x-auto max-h-[70vh] border border-gray-200 rounded-md">
+          <table className="w-full border-collapse text-sm"> */}
+        <div className="overflow-x-auto max-h-[70vh] border border-gray-200 rounded-md">
+          <table className="min-w-[1200px] w-full border-collapse text-sm">
             <thead className="bg-gray-50 sticky top-0 z-20">
               <tr>
-                <th className="sticky left-0 bg-gray-50 border px-2 sm:px-3 py-1 sm:py-2 text-center text-blue-800 z-30 min-w-[120px] text-xs sm:text-sm">
+                <th className="sticky left-0 bg-gray-50 border px-2 sm:px-3 py-1 sm:py-2 text-center text-blue-800 z-30 min-w-[200px] text-xs sm:text-sm">
                   Запослени
                 </th>
                 {days.map((d) => {

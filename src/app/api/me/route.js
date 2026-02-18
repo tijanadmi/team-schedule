@@ -50,7 +50,7 @@ export async function GET() {
     .single();
 
   if (empError) {
-    console.error("Greška pri dohvaćanju zaposlenog:", empError);
+    console.error("Грешка при дохватању запосленог:", empError);
     return NextResponse.json({ user: null });
   }
 

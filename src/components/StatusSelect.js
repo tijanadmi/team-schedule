@@ -2,10 +2,13 @@
 
 import { useState, useTransition, useMemo } from "react";
 import { updateWorkStatus } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 
 export function StatusSelect({ employeeId, date, value, statuses, canEdit }) {
   const [isPending, startTransition] = useTransition();
   const [selected, setSelected] = useState(value ?? "");
+
+  const router = useRouter();
 
   // pronađi objekat statusa na osnovu izabrane vrednosti
   const selectedStatus = useMemo(() => {
@@ -14,14 +17,16 @@ export function StatusSelect({ employeeId, date, value, statuses, canEdit }) {
 
   const backgroundColor = selectedStatus?.color_hex || "transparent";
 
-  function handleChange(e) {
+  async function handleChange(e) {
     if (!canEdit) return;
 
     const statusId = e.target.value ? Number(e.target.value) : null;
     setSelected(statusId ?? "");
 
-    startTransition(() => {
-      updateWorkStatus(employeeId, date, statusId);
+    // Čekamo da se upsert završi pre refresh-a
+    startTransition(async () => {
+      await updateWorkStatus(employeeId, date, statusId);
+      router.refresh();
     });
   }
 

@@ -2,13 +2,13 @@
 
 // import { supabase, supabaseUrl } from "./supabase";
 import { createActionSupabaseClient } from "@/lib/supabase/action";
-import { revalidatePath } from "next/cache";
+// import { revalidatePath } from "next/cache";
 
 /** Ažurira status zaposlenog za određeni datum */
 export async function updateWorkStatus(employeeId, date, statusId) {
   const supabase = await createActionSupabaseClient();
 
-  const [year, month] = date.split("-");
+  // const [year, month] = date.split("-");
 
   if (statusId === null || statusId === undefined) {
     const { error } = await supabase
@@ -19,8 +19,9 @@ export async function updateWorkStatus(employeeId, date, statusId) {
 
     if (error) throw new Error(error.message);
 
-    revalidatePath(`/schedule/${year}/${month}`);
-    // revalidatePath(`/schedule`);
+    // revalidatePath(`/schedule/${year}/${month}`);
+    // revalidatePath(`/dashboard/${year}/${month}`);
+
     return;
   }
 
@@ -37,6 +38,6 @@ export async function updateWorkStatus(employeeId, date, statusId) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath(`/schedule/${year}/${month}`);
-  // revalidatePath(`/schedule`);
+  // revalidatePath(`/schedule/${year}/${month}`);
+  // revalidatePath(`/dashboard/${year}/${month}`);
 }
