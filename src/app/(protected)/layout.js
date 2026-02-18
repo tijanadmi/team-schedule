@@ -18,9 +18,11 @@ export default async function ProtectedLayout({ children }) {
     //   {/* fluid container */}
     //   <div className="w-full">{children}</div>
     // </div>
-    // <div className="min-h-screen w-screen overflow-x-hidden bg-white text-gray-800">
-    //   {children}
-    // </div>
-    <>{children}</>
+
+    <div className="min-h-screen w-full bg-gray-100 text-gray-800">
+      {children}
+    </div>
+
+    // <>{children}</>
   );
 }

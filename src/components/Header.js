@@ -24,22 +24,27 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      {/* <div className="w-full px-6 py-6 flex justify-between items-center"> */}
+      <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
         <Link
           href={`/dashboard/${currentYear}/${currentMonth}`}
-          className="flex items-center space-x-2"
+          // className="flex items-center space-x-2"
+          className="flex items-center gap-2"
         >
           <Image src="/logo.png" alt="ТИС лого" width={40} height={40} />
-          <span className="text-xl md:text-2xl text-blue-800  font-light tracking-wide">
+          {/* <span className="text-xl md:text-2xl text-blue-800  font-light tracking-wide"> */}
+          <span className="text-lg sm:text-xl md:text-2xl text-blue-800 font-light tracking-wide">
             Евиденција
           </span>
         </Link>
 
+        {/* Desktop navigacija */}
         <div className="hidden md:block">
           {!loading && <Navigation user={user} />}
         </div>
 
-        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden">
+        {/* Mobile dugme */}
+        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2">
           <svg
             className="w-6 h-6"
             fill="none"
@@ -56,8 +61,11 @@ export default function Header() {
         </button>
       </div>
 
+      {/* Mobile meni */}
       {isOpen && !loading && (
-        <Navigation onLinkClick={handleLinkClick} user={user} />
+        <div className="md:hidden px-4 pb-4">
+          <Navigation onLinkClick={handleLinkClick} user={user} />
+        </div>
       )}
     </header>
   );

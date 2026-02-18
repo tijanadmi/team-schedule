@@ -43,8 +43,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-300 px-4">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-semibold text-center mb-6">ТИС</h2>
         {errorMsg && <p className="text-red-500 text-sm mb-4">{errorMsg}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,7 +54,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md"
+              className="w-full border border-gray-300 px-3 py-2 rounded-md bg-white"
               required
             />
           </div>
@@ -64,7 +64,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md"
+              className="w-full border border-gray-300 px-3 py-2 rounded-md bg-white"
               required
             />
           </div>
