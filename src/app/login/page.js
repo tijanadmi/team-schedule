@@ -43,13 +43,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-300 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6">ТИС</h2>
+        <h2 className="text-2xl text-black font-semibold text-center mb-6">
+          ТИС
+        </h2>
         {errorMsg && <p className="text-red-500 text-sm mb-4">{errorMsg}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1 text-sm font-medium">Шифра</label>
+            <label className="block mb-1 text-sm text-gray-900 font-medium">
+              Шифра
+            </label>
             <input
               type="email"
               value={email}
@@ -59,7 +63,9 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium">Лозинка</label>
+            <label className="block mb-1 text-sm text-gray-900 font-medium">
+              Лозинка
+            </label>
             <input
               type="password"
               value={password}

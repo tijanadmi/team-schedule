@@ -55,7 +55,7 @@ export default function ChangePasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-300 px-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6">
+        <h2 className="text-2xl font-semibold text-center text-black mb-6">
           Промена лозинке
         </h2>
 
@@ -64,7 +64,7 @@ export default function ChangePasswordPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1 text-sm font-medium">
+            <label className="block mb-1 text-sm text-gray-900 font-medium">
               Нова лозинка
             </label>
             <input
@@ -77,7 +77,7 @@ export default function ChangePasswordPage() {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium">
+            <label className="block mb-1 text-sm text-gray-900 font-medium">
               Потврда лозинке
             </label>
             <input

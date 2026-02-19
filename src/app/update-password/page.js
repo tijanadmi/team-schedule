@@ -36,7 +36,12 @@ export default function UpdatePasswordPage() {
     }
 
     // 🔐 ODMAH IZLOGUJ KORISNIKA
-    await supabase.auth.signOut();
+    // await supabase.auth.signOut();
+
+    // 🔐 POZOVI SERVER LOGOUT (briše SSR cookie)
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
 
     setMessage("Лозинка успешно промењена. Пријавите се поново.");
 
@@ -46,9 +51,9 @@ export default function UpdatePasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-300 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6">
+        <h2 className="text-2xl font-semibold text-center text-black mb-6">
           Нова лозинка
         </h2>
 
@@ -62,7 +67,7 @@ export default function UpdatePasswordPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md"
+            className="w-full border border-gray-300 text-gray-900 px-3 py-2 rounded-md"
           />
 
           <input
@@ -71,7 +76,7 @@ export default function UpdatePasswordPage() {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md"
+            className="w-full border border-gray-300 text-gray-900 px-3 py-2 rounded-md"
           />
 
           <button
