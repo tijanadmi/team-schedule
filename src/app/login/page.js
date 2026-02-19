@@ -75,6 +75,11 @@ export default function LoginPage() {
             Пријави се
           </button>
         </form>
+        <p className="text-sm text-center mt-4">
+          <a href="/reset-password" className="text-blue-700 hover:underline">
+            Заборавили сте лозинку?
+          </a>
+        </p>
       </div>
     </div>
   );

@@ -73,6 +73,14 @@ export default function Navigation({ onLinkClick, user = null }) {
           </div>
         )}
 
+        {/* 🔹 Promena lozinke */}
+        <Link
+          href="/change-password"
+          className="text-gray-700 hover:text-blue-700 transition-colors duration-200 font-medium"
+        >
+          Промена лозинке
+        </Link>
+
         {/* Logout u glavnom meniju */}
         <LogoutButton
           className="text-gray-600 hover:text-red-600 transition-colors duration-200 font-medium"
@@ -102,6 +110,15 @@ export default function Navigation({ onLinkClick, user = null }) {
             Измени Распоред
           </Link>
         )}
+
+        {/* 🔹 Promena lozinke */}
+        <Link
+          href="/change-password"
+          className="py-2 text-gray-700 font-medium"
+          onClick={onLinkClick}
+        >
+          Промена лозинке
+        </Link>
 
         <LogoutButton
           className="py-2 text-gray-700 font-medium"
