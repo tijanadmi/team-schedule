@@ -45,10 +45,10 @@ export default async function DashboardMonthPage({ params }) {
   return (
     <Layout>
       {/* <section className="bg-white text-gray-800 py-6 px-2 sm:px-6 lg:px-8"> */}
-      <section className="bg-white text-gray-800 w-full  px-4 sm:px-6 lg:px-8">
+      <section className="bg-gray-100 text-gray-800 w-full  px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
         {/* <div className="flex items-center justify-between mb-4 mt-4 sm:mt-6 w-full"> */}
-        <div className="flex items-center justify-between mb-4 mt-4 sm:mt-6">
+        <div className="flex items-center justify-between mb-2 mt-2 sm:mt-6 ">
           <Link
             href={`/dashboard/${prev.year}/${prev.month}`}
             className="text-lg font-semibold  flex-shrink-0"

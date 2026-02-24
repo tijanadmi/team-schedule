@@ -50,7 +50,7 @@ export default async function SchedulePage({ params }) {
 
   return (
     <Layout>
-      <section className="bg-white text-gray-800 py-6 px-2 sm:px-6 lg:px-8">
+      <section className="bg-gray-100 text-gray-800  px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
         <div className="flex items-center justify-between mb-4 mt-4 sm:mt-6 w-full px-1 sm:px-2">
           <Link

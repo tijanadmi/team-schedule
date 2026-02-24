@@ -8,7 +8,7 @@ export default function Layout({ children }) {
       {/* <div className="flex-1 py-12 grid">
         <main className="max-w-7xl mx-auto w-full">{children}</main>
       </div> */}
-      <main className="pt-20 w-full">{children}</main>
+      <main className="pt-20 w-full bg-gray-100">{children}</main>
       <Footer />
     </>
   );
