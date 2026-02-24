@@ -42,6 +42,39 @@ export default async function DashboardMonthPage({ params }) {
     scheduleMap.set(`${r.user_id}-${r.work_date}`, r.status_id);
   });
 
+  /*****dodavanje dela za procenat */
+  // broj zaposlenih
+  const totalEmployees = employees.length;
+  // console.log("totalEmployees ", totalEmployees);
+
+  // mapa: dan -> procenat rada od kuće
+  const workFromHomePercent = {};
+
+  days.forEach((d) => {
+    const date = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+    let count = 0;
+
+    employees.forEach((emp) => {
+      const statusId = scheduleMap.get(`${emp.id}-${date}`);
+      const status = statusMap.get(statusId);
+
+      if (status?.code === "REMOTE") {
+        count++;
+      }
+    });
+
+    workFromHomePercent[d] =
+      totalEmployees > 0 ? Math.round((count / totalEmployees) * 100) : 0;
+    // console.log(
+    //   "Za dan, broj zaposlenih koji rade od kuce",
+    //   d,
+    //   count,
+    //   workFromHomePercent[d],
+    // );
+  });
+  /****** kraj dela za procenat */
+
   return (
     <Layout>
       {/* <section className="bg-white text-gray-800 py-6 px-2 sm:px-6 lg:px-8"> */}
@@ -114,6 +147,34 @@ export default async function DashboardMonthPage({ params }) {
                   );
                 })}
               </tr>
+              {/* /**** dodavanje reda za procente *** */}
+              <tr>
+                <th className="sticky left-0 bg-gray-50 border text-xs text-blue-800">
+                  % Рад од куће
+                </th>
+
+                {days.map((d) => {
+                  const dayOfWeek = new Date(year, month - 1, d).getDay();
+                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+                  return (
+                    <th
+                      key={`percent-${d}`}
+                      className={`border text-center text-xs font-medium ${
+                        isWeekend
+                          ? "bg-gray-100"
+                          : workFromHomePercent[d] > 30
+                            ? "bg-red-200"
+                            : "bg-gray-50"
+                      }`}
+                    >
+                      {isWeekend ? "" : `${workFromHomePercent[d]}%`}
+                    </th>
+                  );
+                })}
+              </tr>
+
+              {/* /**** kraj reda za procente */}
             </thead>
             <tbody>
               {employees.map((emp) => (
