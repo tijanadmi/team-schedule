@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import toast from "react-hot-toast";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -10,24 +11,28 @@ const supabase = createClient(
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-    setErrorMsg("");
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    });
-
-    if (error) {
-      setErrorMsg(error.message);
+    if (!email.trim()) {
+      toast.error("Email је обавезан.");
       return;
     }
 
-    setMessage("Проверите ваш email за линк за ресет лозинке.");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success("Проверите ваш email за линк за ресет лозинке.");
+    } catch (err) {
+      toast.error(err.message || "Došlo je do greške.");
+    }
   };
 
   return (
@@ -36,9 +41,6 @@ export default function ResetPasswordPage() {
         <h2 className="text-2xl font-semibold text-black text-center mb-6">
           Ресет лозинке
         </h2>
-
-        {errorMsg && <p className="text-red-500 text-sm mb-4">{errorMsg}</p>}
-        {message && <p className="text-green-600 text-sm mb-4">{message}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

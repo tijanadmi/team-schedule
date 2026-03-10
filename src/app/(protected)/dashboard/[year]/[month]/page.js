@@ -77,8 +77,8 @@ export default async function DashboardMonthPage({ params }) {
 
   return (
     <Layout>
-      {/* <section className="bg-white text-gray-800 py-6 px-2 sm:px-6 lg:px-8"> */}
-      <section className="bg-gray-100 text-gray-800 w-full  px-4 sm:px-6 lg:px-8">
+      {/* <section className="flex-1 flex flex-col overflow-hidden"> */}
+      <section className="bg-gray-100 text-gray-800 w-full  px-4 sm:px-6 lg:px-8 m-0">
         {/* HEADER */}
         {/* <div className="flex items-center justify-between mb-4 mt-4 sm:mt-6 w-full"> */}
         <div className="flex items-center justify-between mb-2 mt-2 sm:mt-6 ">
@@ -117,7 +117,7 @@ export default async function DashboardMonthPage({ params }) {
           <table className="w-full border-collapse text-sm"> */}
         {/* <div className="overflow-x-auto max-h-[70vh] border border-gray-200 rounded-md">
           <table className="min-w-[1200px] w-full border-collapse text-sm"> */}
-        <div className="w-full overflow-x-auto max-h-[70vh] border border-gray-200 rounded-md">
+        <div className="w-full overflow-x-auto max-h-[70vh] border border-gray-200 rounded-md m-0">
           <table className="min-w-[1200px] table-fixed border-collapse text-sm">
             <thead className="bg-gray-50 sticky top-0 z-20">
               <tr>

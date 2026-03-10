@@ -4,67 +4,40 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import Navigation from "./Navigation";
-import { useUser } from "@/lib/useUser";
-// import { getCurrentUserWithRole } from "@/lib/data-service";
 
-// const mockUser = {
-//   name: "Marija",
-// };
-// const mockUser = null;
-
-export default function Header() {
+export default function Header({ user }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, loading } = useUser();
-  const handleLinkClick = () => setIsOpen(false);
-  // const { user } = getCurrentUserWithRole();
 
   const now = new Date();
   const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // jer je 0-based
+  const currentMonth = now.getMonth() + 1;
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
-      {/* <div className="w-full px-6 py-6 flex justify-between items-center"> */}
       <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
         <Link
           href={`/dashboard/${currentYear}/${currentMonth}`}
-          // className="flex items-center space-x-2"
           className="flex items-center gap-2"
         >
           <Image src="/logo.png" alt="ТИС лого" width={40} height={40} />
-          {/* <span className="text-xl md:text-2xl text-blue-800  font-light tracking-wide"> */}
+
           <span className="text-lg sm:text-xl md:text-2xl text-blue-800 font-light tracking-wide">
             Евиденција
           </span>
         </Link>
 
-        {/* Desktop navigacija */}
         <div className="hidden md:block">
-          {!loading && <Navigation user={user} />}
+          <Navigation user={user} />
         </div>
 
-        {/* Mobile dugme */}
         <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2">
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
+          ☰
         </button>
       </div>
 
-      {/* Mobile meni */}
-      {isOpen && !loading && (
+      {isOpen && (
         <div className="md:hidden px-4 pb-4">
-          <Navigation onLinkClick={handleLinkClick} user={user} />
+          <Navigation user={user} />
         </div>
       )}
     </header>

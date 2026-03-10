@@ -2,21 +2,28 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function ChangePasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg("");
-    setMessage("");
+
+    if (!password.trim()) {
+      toast.error("Лозинка је обавезна.");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Лозинка мора имати најмање 6 карактера.");
+      return;
+    }
 
     if (password !== confirmPassword) {
-      setErrorMsg("Лозинке се не поклапају");
+      toast.error("Лозинке се не поклапају.");
       return;
     }
 
@@ -29,14 +36,12 @@ export default function ChangePasswordPage() {
         body: JSON.stringify({ password }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        setErrorMsg(data.error || "Грешка при промени лозинке");
-        return;
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Грешка при промени лозинке.");
       }
 
-      setMessage("Лозинка је успешно промењена");
+      toast.success("Лозинка је успешно промењена.");
 
       setTimeout(() => {
         const now = new Date();
@@ -48,7 +53,7 @@ export default function ChangePasswordPage() {
         router.push(`/dashboard/${year}/${month}`);
       }, 1000);
     } catch (err) {
-      setErrorMsg("Грешка на серверу" || err);
+      toast.error(err.message || "Дошло је до грешке.");
     }
   };
 
@@ -58,9 +63,6 @@ export default function ChangePasswordPage() {
         <h2 className="text-2xl font-semibold text-center text-black mb-6">
           Промена лозинке
         </h2>
-
-        {errorMsg && <p className="text-red-500 text-sm mb-4">{errorMsg}</p>}
-        {message && <p className="text-green-600 text-sm mb-4">{message}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

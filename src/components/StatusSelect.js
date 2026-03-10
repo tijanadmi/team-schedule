@@ -3,6 +3,7 @@
 import { useState, useTransition, useMemo } from "react";
 import { updateWorkStatus } from "@/lib/actions";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export function StatusSelect({ employeeId, date, value, statuses, canEdit }) {
   const [isPending, startTransition] = useTransition();
@@ -25,8 +26,17 @@ export function StatusSelect({ employeeId, date, value, statuses, canEdit }) {
 
     // Čekamo da se upsert završi pre refresh-a
     startTransition(async () => {
-      await updateWorkStatus(employeeId, date, statusId);
-      router.refresh();
+      // await updateWorkStatus(employeeId, date, statusId);
+      // router.refresh();
+      try {
+        await updateWorkStatus(employeeId, date, statusId);
+
+        toast.success("Измена је успешно сачувана");
+
+        router.refresh();
+      } catch (err) {
+        toast.error(err.message || "Грешка при снимању измене");
+      }
     });
   }
 

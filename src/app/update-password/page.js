@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import toast from "react-hot-toast";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -12,42 +13,51 @@ const supabase = createClient(
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [message, setMessage] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg("");
-    setMessage("");
+
+    if (!password.trim()) {
+      toast.error("Лозинка је обавезна.");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Лозинка мора имати најмање 6 карактера.");
+      return;
+    }
 
     if (password !== confirmPassword) {
-      setErrorMsg("Лозинке се не поклапају");
+      toast.error("Лозинке се не поклапају.");
       return;
     }
 
-    const { error } = await supabase.auth.updateUser({
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
 
-    if (error) {
-      setErrorMsg(error.message);
-      return;
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // 🔐 ODMAH IZLOGUJ KORISNIKA
+      // await supabase.auth.signOut();
+
+      // 🔐 POZOVI SERVER LOGOUT (briše SSR cookie)
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      toast.success("Лозинка успешно промењена. Пријавите се поново.");
+
+      setTimeout(() => {
+        router.push("/"); // login stranica
+      }, 1000);
+    } catch (err) {
+      toast.error(err.message || "Дошло је до грешке.");
     }
-
-    // 🔐 ODMAH IZLOGUJ KORISNIKA
-    // await supabase.auth.signOut();
-
-    // 🔐 POZOVI SERVER LOGOUT (briše SSR cookie)
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-
-    setMessage("Лозинка успешно промењена. Пријавите се поново.");
-
-    setTimeout(() => {
-      router.push("/"); // login stranica
-    }, 1000);
   };
 
   return (
@@ -56,9 +66,6 @@ export default function UpdatePasswordPage() {
         <h2 className="text-2xl font-semibold text-center text-black mb-6">
           Нова лозинка
         </h2>
-
-        {errorMsg && <p className="text-red-500 text-sm mb-4">{errorMsg}</p>}
-        {message && <p className="text-green-600 text-sm mb-4">{message}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

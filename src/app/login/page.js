@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg("");
 
     const formData = new FormData();
     formData.append("email", email);
@@ -25,8 +24,7 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        setErrorMsg(errorData.error || "Грешка при пријави");
-        return;
+        throw new Error(errorData.error || "Грешка при пријави.");
       }
 
       // dobavi tekući mesec i godinu
@@ -34,11 +32,15 @@ export default function LoginPage() {
       const year = now.getFullYear();
       const month = now.getMonth() + 1; // JS meseci idu od 0-11
 
+      toast.success("Успешно сте се пријавили!");
+
       // preusmeri na dashboard sa parametrima
-      router.push(`/dashboard/${year}/${month}`);
+      // router.push(`/dashboard/${year}/${month}`);
+      setTimeout(() => {
+        router.push(`/dashboard/${year}/${month}`);
+      }, 800);
     } catch (err) {
-      setErrorMsg("Неуспешна пријава");
-      console.error(err);
+      toast.error(err.message || "Неуспешна пријава");
     }
   };
 
@@ -48,7 +50,6 @@ export default function LoginPage() {
         <h2 className="text-2xl text-black font-semibold text-center mb-6">
           ТИС
         </h2>
-        {errorMsg && <p className="text-red-500 text-sm mb-4">{errorMsg}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block mb-1 text-sm text-gray-900 font-medium">

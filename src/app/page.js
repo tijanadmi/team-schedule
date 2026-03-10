@@ -13,10 +13,11 @@ export default async function HomePage() {
   const month = now.getMonth() + 1; // JS meseci idu od 0-11
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (error || !user) {
     redirect("/login");
   }
 
