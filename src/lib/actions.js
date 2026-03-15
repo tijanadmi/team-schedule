@@ -1,8 +1,6 @@
 "use server";
 
-// import { supabase, supabaseUrl } from "./supabase";
 import { createActionSupabaseClient } from "@/lib/supabase/action";
-// import { revalidatePath } from "next/cache";
 
 /** Ažurira status zaposlenog za određeni datum */
 export async function updateWorkStatus(employeeId, date, statusId) {
@@ -19,9 +17,6 @@ export async function updateWorkStatus(employeeId, date, statusId) {
 
     if (error) throw new Error(error.message);
 
-    // revalidatePath(`/schedule/${year}/${month}`);
-    // revalidatePath(`/dashboard/${year}/${month}`);
-
     return;
   }
 
@@ -37,7 +32,4 @@ export async function updateWorkStatus(employeeId, date, statusId) {
   );
 
   if (error) throw new Error(error.message);
-
-  // revalidatePath(`/schedule/${year}/${month}`);
-  // revalidatePath(`/dashboard/${year}/${month}`);
 }

@@ -131,3 +131,22 @@ export async function getEmployeesForCurrentUser() {
   if (error) throw new Error("Zaposleni nisu mogli biti učitani");
   return data;
 }
+
+export async function getAuditForMonth(year, month) {
+  const dim = new Date(year, month, 0).getDate();
+
+  const start = `${year}-${String(month).padStart(2, "0")}-01`;
+  const end = `${year}-${String(month).padStart(2, "0")}-${dim}`;
+
+  const { data, error } = await supabase
+    .from("work_schedule_audit_view")
+    .select("*")
+    .gte("work_date", start)
+    .lte("work_date", end)
+    .order("changed_at");
+
+  if (error) throw new Error("Audit nije mogao biti učitan");
+
+  // console.log("Audit podaci", year, month, start, end, data);
+  return data;
+}

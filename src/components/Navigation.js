@@ -68,6 +68,16 @@ export default function Navigation({ onLinkClick, user = null }) {
                 >
                   Измени
                 </Link>
+                <Link
+                  href={`/audit/${currentYear}/${currentMonth}`}
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                  onClick={(e) => {
+                    setIsDropdownOpen(false);
+                    onLinkClick?.(e);
+                  }}
+                >
+                  Историја промена
+                </Link>
               </div>
             )}
           </div>
@@ -108,6 +118,16 @@ export default function Navigation({ onLinkClick, user = null }) {
             onClick={onLinkClick}
           >
             Измени Распоред
+          </Link>
+        )}
+
+        {user.role !== "gle" && (
+          <Link
+            href={`/audit/${currentYear}/${currentMonth}`}
+            className="py-2 text-gray-700 font-medium"
+            onClick={onLinkClick}
+          >
+            Историја промена
           </Link>
         )}
 
