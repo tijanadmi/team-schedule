@@ -195,7 +195,7 @@ export default async function DashboardMonthPage({ params }) {
                     return (
                       <td
                         key={d}
-                        className="border w-[60px] px-1.5 py-[2px] text-center text-[10px] leading-tight"
+                        className="border w-[60px] px-1.5 py-[4px] text-center text-[10px] leading-tight"
                         style={{
                           backgroundColor:
                             dayOfWeek === 0 || dayOfWeek === 6

@@ -25,7 +25,7 @@ ${h.old_status_label || "-"} → ${h.new_status_label || "-"}`;
       <td
         onClick={() => history.length && setOpen(true)}
         title={historyText}
-        className="border w-[60px] px-1.5 py-[2px] text-center text-[10px] leading-none cursor-pointer"
+        className="border w-[60px] px-1.5 py-[4px] text-center text-[10px] leading-tight cursor-pointer"
         style={{ backgroundColor }}
       >
         <span className="hidden sm:inline">{label}</span>
