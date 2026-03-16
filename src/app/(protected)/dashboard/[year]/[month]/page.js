@@ -130,8 +130,8 @@ export default async function DashboardMonthPage({ params }) {
                   return (
                     <th
                       key={d}
-                      className="border px-2 sm:px-2 py-1 sm:py-2 text-center min-w-[35px] sm:min-w-[45px] text-xs sm:text-sm"
-                      // className="border w-[45px] text-center text-xs sm:text-sm"
+                      // className="border px-2 sm:px-2 py-1 sm:py-2 text-center min-w-[35px] sm:min-w-[45px] text-[10px] sm:text-xs"
+                      className="border px-2 sm:px-2 py-1 sm:py-2 text-center min-w-[28px] sm:min-w-[32px] text-[10px] sm:text-xs"
                       style={{
                         backgroundColor:
                           dayOfWeek === 0 || dayOfWeek === 6
@@ -140,7 +140,7 @@ export default async function DashboardMonthPage({ params }) {
                       }}
                     >
                       <div className="font-medium">{d}</div>
-                      <div className="text-[10px] sm:text-xs font-light">
+                      <div className="text-[9px] sm:text-[10px] font-light">
                         {daysOfWeek[dayOfWeek]}
                       </div>
                     </th>
@@ -178,16 +178,12 @@ export default async function DashboardMonthPage({ params }) {
             </thead>
             <tbody>
               {employees.map((emp) => (
-                <tr key={emp.id} className="hover:bg-gray-50">
-                  <td
-                    // className="sticky left-0 bg-white font-medium w-[45px] z-10 px-1 sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm"
-                    // className="sticky left-0 bg-gray-50 border w-[200px]  text-blue-800  sm:px-2 py-0.5 sm:py-1 text-xs sm:text-sm"
-                    // className="sticky left-0 bg-gray-50 border w-[200px] text-blue-800 px-3 sm:px-4 py-1 sm:py-2 text-sm"
-                    // className="sticky left-0 bg-gray-50 border w-[200px] px-4 py-2 text-left text-blue-800 text-sm font-medium"
-                    className="sticky left-0 bg-gray-50 border w-[220px] px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-left text-blue-800"
-
-                    // style={{ minWidth: "120px" }}
-                  >
+                <tr
+                  key={emp.id}
+                  className="group hover:outline hover:outline-2 hover:outline-gray-300"
+                >
+                  <td className="sticky left-0 bg-gray-50 border w-[220px] px-0.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-left text-blue-800 group-hover:bg-blue-100">
+                    {/* <td className="sticky left-0 bg-gray-50 border w-[220px] px-0.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-left text-blue-800"> */}
                     {emp.full_name}
                   </td>
                   {days.map((d) => {
@@ -199,9 +195,7 @@ export default async function DashboardMonthPage({ params }) {
                     return (
                       <td
                         key={d}
-                        // className="border px-1 sm:px-2 py-1 sm:py-1 text-center text-xs sm:text-sm break-words"
-                        // className="border w-[45px] text-center text-xs overflow-hidden"
-                        className="border w-[85px] px-2 py-1 text-center text-xs leading-tight"
+                        className="border w-[60px] px-1.5 py-[2px] text-center text-[10px] leading-tight"
                         style={{
                           backgroundColor:
                             dayOfWeek === 0 || dayOfWeek === 6

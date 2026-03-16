@@ -1,5 +1,6 @@
 // src/app/(protected)/dashboard/[year]/[month]/page.js
 import Layout from "@/components/Layout";
+import AuditCell from "@/components/AuditCell";
 import Link from "next/link";
 import { daysInMonth, prevNext } from "@/lib/calendar";
 import {
@@ -107,7 +108,7 @@ export default async function AuditMonthPage({ params }) {
 
           <div className="flex items-center gap-3">
             <h3 className="text-lg sm:text-xl font-semibold text-blue-800">
-              {monthLabel}
+              Историја измена за {monthLabel}
             </h3>
           </div>
 
@@ -132,7 +133,7 @@ export default async function AuditMonthPage({ params }) {
                   return (
                     <th
                       key={d}
-                      className="border px-2 sm:px-2 py-1 sm:py-2 text-center min-w-[35px] sm:min-w-[45px] text-xs sm:text-sm"
+                      className="border px-2 sm:px-2 py-1 sm:py-2 text-center min-w-[28px] sm:min-w-[32px] text-[10px] sm:text-xs"
                       style={{
                         backgroundColor:
                           dayOfWeek === 0 || dayOfWeek === 6
@@ -141,7 +142,7 @@ export default async function AuditMonthPage({ params }) {
                       }}
                     >
                       <div className="font-medium">{d}</div>
-                      <div className="text-[10px] sm:text-xs font-light">
+                      <div className="text-[9px] sm:text-[10px] font-light">
                         {daysOfWeek[dayOfWeek]}
                       </div>
                     </th>
@@ -179,12 +180,12 @@ export default async function AuditMonthPage({ params }) {
             </thead>
             <tbody>
               {employees.map((emp) => (
-                <tr key={emp.id} className="hover:bg-gray-50">
-                  <td
-                    className="sticky left-0 bg-gray-50 border w-[220px] px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-left text-blue-800"
-
-                    // style={{ minWidth: "120px" }}
-                  >
+                <tr
+                  key={emp.id}
+                  className="group hover:outline hover:outline-2 hover:outline-gray-300"
+                >
+                  <td className="sticky left-0 bg-gray-50 border w-[220px] px-0.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-left text-blue-800 group-hover:bg-blue-100">
+                    {/* <td className="sticky left-0 bg-gray-50 group-hover:bg-gray-50 border w-[220px] px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-left text-blue-800"> */}
                     {emp.full_name}
                   </td>
                   {days.map((d) => {
@@ -195,39 +196,17 @@ export default async function AuditMonthPage({ params }) {
                     const dayOfWeek = new Date(year, month - 1, d).getDay();
 
                     return (
-                      <td
+                      <AuditCell
                         key={d}
-                        className="border w-[85px] px-2 py-1 text-center text-xs leading-tight"
-                        title={history
-                          .map((h) => {
-                            const dateTime = new Date(h.changed_at);
-                            const dateStr =
-                              dateTime.toLocaleDateString("sr-RS"); // 14.3.2026
-                            const timeStr = dateTime.toLocaleTimeString(
-                              "sr-RS",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                              },
-                            ); // 14:20:05
-                            return `${dateStr} ${timeStr} - ${h.changed_by_name}\n${h.old_status_label || "-"} → ${h.new_status_label || "-"}`;
-                          })
-                          .join("\n----------------\n")} // crtica između audit slogova
-                        style={{
-                          backgroundColor:
-                            dayOfWeek === 0 || dayOfWeek === 6
-                              ? "#f0f0f0"
-                              : status?.color_hex || "transparent",
-                        }}
-                      >
-                        <span className="hidden sm:inline">
-                          {status?.label || ""}
-                        </span>
-                        <span className="inline sm:hidden">
-                          {status?.code_sr || ""}
-                        </span>
-                      </td>
+                        history={history}
+                        backgroundColor={
+                          dayOfWeek === 0 || dayOfWeek === 6
+                            ? "#f0f0f0"
+                            : status?.color_hex || "transparent"
+                        }
+                        label={status?.label || ""}
+                        code={status?.code_sr || ""}
+                      />
                     );
                   })}
                 </tr>

@@ -76,7 +76,7 @@ export default function Navigation({ onLinkClick, user = null }) {
                     onLinkClick?.(e);
                   }}
                 >
-                  Историја промена
+                  Историја измена
                 </Link>
               </div>
             )}
@@ -127,7 +127,7 @@ export default function Navigation({ onLinkClick, user = null }) {
             className="py-2 text-gray-700 font-medium"
             onClick={onLinkClick}
           >
-            Историја промена
+            Историја измена
           </Link>
         )}
 
