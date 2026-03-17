@@ -184,8 +184,8 @@ export default async function AuditMonthPage({ params }) {
                   key={emp.id}
                   className="group hover:outline hover:outline-2 hover:outline-gray-300"
                 >
-                  <td className="sticky left-0 bg-gray-50 border w-[220px] px-0.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-left text-blue-800 group-hover:bg-blue-100">
-                    {/* <td className="sticky left-0 bg-gray-50 group-hover:bg-gray-50 border w-[220px] px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-left text-blue-800"> */}
+                  {/* <td className="sticky left-0 bg-gray-50 border w-[220px] px-0.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-left text-blue-800 group-hover:bg-blue-100"> */}
+                  <td className="sticky left-0 bg-gray-50 border w-[220px] min-w-[100px] max-w-[100px] px-0.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-left text-blue-800 group-hover:bg-blue-100">
                     {emp.full_name}
                   </td>
                   {days.map((d) => {
