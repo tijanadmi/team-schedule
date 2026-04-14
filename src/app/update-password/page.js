@@ -74,7 +74,7 @@ export default function UpdatePasswordPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 text-gray-900 px-3 py-2 rounded-md"
+            className="w-full border border-gray-300 text-gray-900 px-3 py-2 rounded-md text-black"
           />
 
           <input
@@ -83,7 +83,7 @@ export default function UpdatePasswordPage() {
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border border-gray-300 text-gray-900 px-3 py-2 rounded-md"
+            className="w-full border border-gray-300 text-gray-900 px-3 py-2 rounded-md text-black"
           />
 
           <button
