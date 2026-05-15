@@ -3,7 +3,8 @@ import Layout from "@/components/Layout";
 import Link from "next/link";
 import { daysInMonth, prevNext } from "@/lib/calendar";
 import {
-  getEmployees,
+  // getEmployees,
+  getEmployeesByOrg,
   getStatuses,
   getScheduleForMonthDashboard,
 } from "@/lib/data-service";
@@ -27,7 +28,7 @@ export default async function DashboardMonthPage({ params }) {
   });
 
   const [employees = [], statuses = [], schedule = []] = await Promise.all([
-    getEmployees(),
+    getEmployeesByOrg(),
     getStatuses(),
     getScheduleForMonthDashboard(year, month),
   ]);

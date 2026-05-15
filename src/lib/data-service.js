@@ -150,3 +150,60 @@ export async function getAuditForMonth(year, month) {
   // console.log("Audit podaci", year, month, start, end, data);
   return data;
 }
+
+// Dohvati zaposlene koje korisnik sme da vidi
+export async function getEmployeesByOrg() {
+  const supabase = createServerSupabaseClient();
+
+  // Ulogovani korisnik
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  // Podaci zaposlenog
+  const { data: employee, error: empError } = await supabase
+    .from("employees")
+    .select("id, role, org")
+    .eq("id", user.id)
+    .single();
+
+  if (empError || !employee) {
+    throw new Error("Ne mogu da učitam zaposlenog.");
+  }
+
+  // Admin i GLE vide sve
+  if (employee.role === "admin" || employee.role === "gle") {
+    const { data, error } = await supabase
+      .from("employees")
+      .select("*")
+      .neq("role", "gle")
+      .order("org", { ascending: true })
+      .order("sort", { ascending: true });
+
+    if (error) {
+      throw new Error("Zaposleni nisu mogli biti učitani.");
+    }
+
+    return data;
+  }
+
+  // Prefiks organizacije (npr. SRTS ili SRPS)
+  const orgPrefix = employee.org.substring(0, 4);
+
+  // Korisnik vidi samo svoju grupaciju
+  const { data, error } = await supabase
+    .from("employees")
+    .select("*")
+    .like("org", `${orgPrefix}%`)
+    .neq("role", "gle")
+    .order("org", { ascending: true })
+    .order("sort", { ascending: true });
+
+  if (error) {
+    throw new Error("Zaposleni nisu mogli biti učitani.");
+  }
+
+  return data;
+}
