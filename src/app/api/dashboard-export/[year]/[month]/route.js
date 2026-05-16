@@ -5,7 +5,8 @@ export const revalidate = 0;
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import {
-  getEmployees,
+  // getEmployees,
+  getEmployeesByOrg,
   getStatuses,
   getScheduleForMonthDashboard,
 } from "@/lib/data-service";
@@ -21,10 +22,14 @@ export async function GET(request, { params }) {
   const days = Array.from({ length: dim }, (_, i) => i + 1);
 
   const [employees = [], statuses = [], schedule = []] = await Promise.all([
-    getEmployees(),
+    // getEmployees(),
+    getEmployeesByOrg(),
     getStatuses(),
     getScheduleForMonthDashboard(year, month),
   ]);
+
+  const orgPrefix =
+    employees.length > 0 ? employees[0].org.substring(0, 4) : "ORG";
 
   employees.sort((a, b) => a.org.localeCompare(b.org));
 
@@ -37,8 +42,11 @@ export async function GET(request, { params }) {
   });
 
   const workbook = new ExcelJS.Workbook();
+  // const worksheet = workbook.addWorksheet(
+  //   `SRTS-${String(month).padStart(2, "0")}-${year}`,
+  // );
   const worksheet = workbook.addWorksheet(
-    `SRTS-${String(month).padStart(2, "0")}-${year}`,
+    `${orgPrefix}-${String(month).padStart(2, "0")}-${year}`,
   );
 
   // =====================
@@ -207,7 +215,8 @@ export async function GET(request, { params }) {
     headers: {
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename=Evidencija_SRTS-${String(month).padStart(2, "0")}-${year}.xlsx`,
+      // "Content-Disposition": `attachment; filename=Evidencija_SRTS-${String(month).padStart(2, "0")}-${year}.xlsx`,
+      "Content-Disposition": `attachment; filename=Evidencija_${orgPrefix}-${String(month).padStart(2, "0")}-${year}.xlsx`,
     },
   });
 }
