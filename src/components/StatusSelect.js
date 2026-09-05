@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useRef, useEffect } from "react";
 import { updateWorkStatus } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -8,6 +8,12 @@ import toast from "react-hot-toast";
 export function StatusSelect({ employeeId, date, value, statuses, canEdit }) {
   const [isPending, startTransition] = useTransition();
   const [selected, setSelected] = useState(value ?? "");
+  const [isSaving, setIsSaving] = useState(false);
+  const saving = useRef(false);
+
+  useEffect(() => {
+    if (!saving.current) setSelected(value ?? "");
+  }, [value]);
 
   const router = useRouter();
 
@@ -19,25 +25,29 @@ export function StatusSelect({ employeeId, date, value, statuses, canEdit }) {
   const backgroundColor = selectedStatus?.color_hex || "transparent";
 
   async function handleChange(e) {
-    if (!canEdit) return;
+    if (!canEdit || saving.current || isPending) return;
 
     const statusId = e.target.value ? Number(e.target.value) : null;
+    if (statusId === (selected === "" ? null : Number(selected))) return;
+    const previous = selected;
+    saving.current = true;
+    setIsSaving(true);
     setSelected(statusId ?? "");
 
-    // Čekamo da se upsert završi pre refresh-a
-    startTransition(async () => {
-      // await updateWorkStatus(employeeId, date, statusId);
-      // router.refresh();
-      try {
-        await updateWorkStatus(employeeId, date, statusId);
-
-        toast.success("Измена је успешно сачувана");
-
-        router.refresh();
-      } catch (err) {
-        toast.error(err.message || "Грешка при снимању измене");
-      }
-    });
+    const toastId = `work-status-${employeeId}-${date}`;
+    toast.loading("Чување измене...", { id: toastId });
+    try {
+      await updateWorkStatus(employeeId, date, statusId);
+      toast.success("Измена је успешно сачувана", { id: toastId });
+      // React 18 requires a new transition after the asynchronous save.
+      startTransition(() => router.refresh());
+    } catch (err) {
+      setSelected(previous);
+      toast.error(err.message || "Грешка при снимању измене", { id: toastId });
+    } finally {
+      saving.current = false;
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -52,7 +62,8 @@ export function StatusSelect({ employeeId, date, value, statuses, canEdit }) {
       <select
         value={selected}
         onChange={handleChange}
-        disabled={isPending || !canEdit}
+        disabled={isSaving || isPending || !canEdit}
+        aria-busy={isSaving || isPending}
         className="w-full bg-transparent text-xs sm:text-sm focus:outline-none"
       >
         <option value="">—</option>

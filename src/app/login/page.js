@@ -1,16 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const submitting = useRef(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
+    setLoading(true);
+    toast.loading("Пријављивање...", { id: "login" });
 
     const formData = new FormData();
     formData.append("email", email);
@@ -32,15 +36,12 @@ export default function LoginPage() {
       const year = now.getFullYear();
       const month = now.getMonth() + 1; // JS meseci idu od 0-11
 
-      toast.success("Успешно сте се пријавили!");
-
-      // preusmeri na dashboard sa parametrima
-      // router.push(`/dashboard/${year}/${month}`);
-      setTimeout(() => {
-        router.push(`/dashboard/${year}/${month}`);
-      }, 800);
+      // Discard pages cached under the previous session.
+      window.location.replace(`/dashboard/${year}/${month}`);
     } catch (err) {
-      toast.error(err.message || "Неуспешна пријава");
+      toast.error(err.message || "Неуспешна пријава", { id: "login" });
+      submitting.current = false;
+      setLoading(false);
     }
   };
 
@@ -77,9 +78,11 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
+            disabled={loading}
+            aria-busy={loading}
             className="w-full bg-blue-800 text-white py-2 rounded-md hover:bg-blue-900 transition"
           >
-            Пријави се
+            {loading ? "Пријављивање..." : "Пријави се"}
           </button>
         </form>
         <p className="text-sm text-center mt-4">

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function LogoutButton({ className = "", onClick }) {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const submitting = useRef(false);
 
   const handleLogout = async () => {
+    if (submitting.current) return;
+    submitting.current = true;
     setLoading(true);
 
     try {
@@ -16,17 +18,15 @@ export default function LogoutButton({ className = "", onClick }) {
       });
 
       if (!res.ok) {
-        console.error("Грешка при одјави");
-        return;
+        throw new Error("Грешка при одјави");
       }
 
       onClick?.();
-      router.push("/login");
+      window.location.replace("/login");
     } catch (err) {
-      console.error("Грешка при одјави:", err);
-    } finally {
+      toast.error(err.message || "Грешка при одјави", { id: "logout" });
+      submitting.current = false;
       setLoading(false);
-      onClick?.();
     }
   };
 

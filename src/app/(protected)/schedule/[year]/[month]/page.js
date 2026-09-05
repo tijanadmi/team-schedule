@@ -9,6 +9,7 @@ import {
   getCurrentUserWithRole,
 } from "@/lib/data-service";
 import { StatusSelect } from "@/components/StatusSelect";
+import ScheduleScrollContainer from "@/components/ScheduleScrollContainer";
 
 export const revalidate = 0;
 
@@ -73,7 +74,10 @@ export default async function SchedulePage({ params }) {
         </div>
 
         {/* TABLE */}
-        <div className="w-full overflow-x-auto max-h-[70vh] border border-gray-200 rounded-md">
+        <ScheduleScrollContainer
+          key={`${currentUserId}-${year}-${month}`}
+          scrollKey={`${currentUserId}-${year}-${month}`}
+        >
           <table className="table-fixed w-max min-w-full border-collapse text-sm">
             <thead className="bg-gray-50 sticky top-0 z-20">
               <tr>
@@ -151,7 +155,7 @@ export default async function SchedulePage({ params }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScheduleScrollContainer>
       </section>
     </Layout>
   );
