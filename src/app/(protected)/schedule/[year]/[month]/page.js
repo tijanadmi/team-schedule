@@ -29,7 +29,8 @@ export default async function SchedulePage({ params }) {
   });
 
   const [employees = [], statuses = [], schedule = []] = await Promise.all([
-    getEmployeesForCurrentUser().catch(() => []),
+    // getEmployeesForCurrentUser().catch(() => []),
+    getEmployeesForCurrentUser(year, month),
     getStatuses().catch(() => []),
     getScheduleForMonth(year, month).catch(() => []),
   ]);

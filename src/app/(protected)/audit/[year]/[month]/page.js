@@ -4,7 +4,6 @@ import AuditCell from "@/components/AuditCell";
 import Link from "next/link";
 import { daysInMonth, prevNext } from "@/lib/calendar";
 import {
-  // getEmployees,
   getEmployeesByOrg,
   getStatuses,
   getScheduleForMonthDashboard,
@@ -33,7 +32,7 @@ export default async function AuditMonthPage({ params }) {
 
   const [employees = [], statuses = [], schedule = [], audit = []] =
     await Promise.all([
-      getEmployeesByOrg(),
+      getEmployeesByOrg(year, month),
       getStatuses(),
       getScheduleForMonthDashboard(year, month),
       getAuditForMonth(year, month),

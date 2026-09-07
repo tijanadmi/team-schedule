@@ -28,7 +28,8 @@ export default async function DashboardMonthPage({ params }) {
   });
 
   const [employees = [], statuses = [], schedule = []] = await Promise.all([
-    getEmployeesByOrg(),
+    // getEmployeesByOrg(),
+    getEmployeesByOrg(year, month),
     getStatuses(),
     getScheduleForMonthDashboard(year, month),
   ]);

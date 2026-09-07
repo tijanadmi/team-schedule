@@ -5,7 +5,6 @@ export const revalidate = 0;
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import {
-  // getEmployees,
   getEmployeesByOrg,
   getStatuses,
   getScheduleForMonthDashboard,
@@ -22,8 +21,7 @@ export async function GET(request, { params }) {
   const days = Array.from({ length: dim }, (_, i) => i + 1);
 
   const [employees = [], statuses = [], schedule = []] = await Promise.all([
-    // getEmployees(),
-    getEmployeesByOrg(),
+    getEmployeesByOrg(year, month),
     getStatuses(),
     getScheduleForMonthDashboard(year, month),
   ]);
