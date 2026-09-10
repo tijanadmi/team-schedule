@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import AuditCell from "@/components/AuditCell";
 import Link from "next/link";
 import { daysInMonth, prevNext } from "@/lib/calendar";
+import { isEmployedOnDate } from "@/lib/employment";
 import {
   getEmployeesByOrg,
   getStatuses,
@@ -69,28 +70,29 @@ export default async function AuditMonthPage({ params }) {
   /**** kraj pravljenja mape istorija */
 
   /*****dodavanje dela za procenat */
-  // broj zaposlenih
-  const totalEmployees = employees.length;
-
-  // mapa: dan -> procenat rada od kuće
+  // Dnevni procenat rada od kuće među zaposlenima na taj datum.
   const workFromHomePercent = {};
 
   days.forEach((d) => {
-    const date = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const date = `${year}-${String(month).padStart(2, "0")}-${String(
+      d,
+    ).padStart(2, "0")}`;
 
-    let count = 0;
+    const employeesForDay = employees.filter((emp) =>
+      isEmployedOnDate(emp, date),
+    );
 
-    employees.forEach((emp) => {
+    const remoteCount = employeesForDay.reduce((count, emp) => {
       const statusId = scheduleMap.get(`${emp.id}-${date}`);
       const status = statusMap.get(statusId);
 
-      if (status?.code === "REMOTE") {
-        count++;
-      }
-    });
+      return count + (status?.code === "REMOTE" ? 1 : 0);
+    }, 0);
 
     workFromHomePercent[d] =
-      totalEmployees > 0 ? Math.round((count / totalEmployees) * 100) : 0;
+      employeesForDay.length > 0
+        ? Math.round((remoteCount / employeesForDay.length) * 100)
+        : 0;
   });
   /****** kraj dela za procenat */
 

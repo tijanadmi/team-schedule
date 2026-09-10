@@ -2,6 +2,7 @@
 import Layout from "@/components/Layout";
 import Link from "next/link";
 import { daysInMonth, prevNext } from "@/lib/calendar";
+import { isEmployedOnDate } from "@/lib/employment";
 import {
   getEmployeesForCurrentUser,
   getStatuses,
@@ -124,10 +125,22 @@ export default async function SchedulePage({ params }) {
                     const key = `${emp.id}-${date}`;
                     const value = scheduleMap.get(key) ?? null;
 
-                    const canEdit =
+                    /* stari kod */
+                    {
+                      /* const canEdit =
+                      emp.id === currentUserId ||
+                      emp.manager_id === currentUserId ||
+                      currentUserRole === "admin"; */
+                    }
+
+                    const isEmployed = isEmployedOnDate(emp, date);
+
+                    const hasEditPermission =
                       emp.id === currentUserId ||
                       emp.manager_id === currentUserId ||
                       currentUserRole === "admin";
+
+                    const canEdit = hasEditPermission && isEmployed;
 
                     const dayOfWeek = new Date(year, month - 1, d).getDay();
                     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -136,11 +149,23 @@ export default async function SchedulePage({ params }) {
                       <td
                         key={d}
                         className="border px-1 sm:px-2 py-1 sm:py-2 text-center text-xs sm:text-sm"
+                        // style={{
+                        //   backgroundColor: isWeekend
+                        //     ? "#f0f0f0"
+                        //     : "transparent",
+                        // }}
                         style={{
-                          backgroundColor: isWeekend
-                            ? "#f0f0f0"
-                            : "transparent",
+                          backgroundColor: !isEmployed
+                            ? "#e5e7eb"
+                            : isWeekend
+                              ? "#f0f0f0"
+                              : "transparent",
                         }}
+                        title={
+                          !isEmployed
+                            ? "Запослени није у радном односу на овај датум."
+                            : undefined
+                        }
                       >
                         <StatusSelect
                           employeeId={emp.id}
