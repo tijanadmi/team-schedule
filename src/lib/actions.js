@@ -2,6 +2,7 @@
 
 import { createActionSupabaseClient } from "@/lib/supabase/action";
 import { isEmployedOnDate } from "@/lib/employment";
+import { requireActiveEmployee } from "@/lib/access";
 
 export async function updateWorkStatus(employeeId, date, statusId) {
   // Datum mora biti stvaran kalendarski datum u formatu YYYY-MM-DD.
@@ -24,33 +25,48 @@ export async function updateWorkStatus(employeeId, date, statusId) {
     throw new Error("Неисправан статус.");
   }
 
+  // const supabase = await createActionSupabaseClient();
+
+  // const {
+  //   data: { user },
+  //   error: authError,
+  // } = await supabase.auth.getUser();
+
+  // if (authError || !user) {
+  //   throw new Error("Морате бити пријављени.");
+  // }
+
+  // const [
+  //   { data: currentEmployee, error: currentEmployeeError },
+  //   { data: employee, error: employeeError },
+  // ] = await Promise.all([
+  //   supabase.from("employees").select("id, role").eq("id", user.id).single(),
+
+  //   supabase
+  //     .from("employees")
+  //     .select("id, manager_id, employment_start_date, employment_end_date")
+  //     .eq("id", employeeId)
+  //     .single(),
+  // ]);
+
+  // if (currentEmployeeError || !currentEmployee) {
+  //   throw new Error("Не могу да учитам пријављеног корисника.");
+  // }
+
+  // if (employeeError || !employee) {
+  //   throw new Error("Не могу да учитам запосленог.");
+  // }
+
   const supabase = await createActionSupabaseClient();
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const { user, employee: currentEmployee } =
+    await requireActiveEmployee(supabase);
 
-  if (authError || !user) {
-    throw new Error("Морате бити пријављени.");
-  }
-
-  const [
-    { data: currentEmployee, error: currentEmployeeError },
-    { data: employee, error: employeeError },
-  ] = await Promise.all([
-    supabase.from("employees").select("id, role").eq("id", user.id).single(),
-
-    supabase
-      .from("employees")
-      .select("id, manager_id, employment_start_date, employment_end_date")
-      .eq("id", employeeId)
-      .single(),
-  ]);
-
-  if (currentEmployeeError || !currentEmployee) {
-    throw new Error("Не могу да учитам пријављеног корисника.");
-  }
+  const { data: employee, error: employeeError } = await supabase
+    .from("employees")
+    .select("id, manager_id, employment_start_date, employment_end_date")
+    .eq("id", employeeId)
+    .single();
 
   if (employeeError || !employee) {
     throw new Error("Не могу да учитам запосленог.");

@@ -1,23 +1,43 @@
-import { createServerSupabaseClient } from "./supabase/server";
+// import { createServerSupabaseClient } from "./supabase/server";
+
+// export async function getUserWithRole() {
+//   const supabase = createServerSupabaseClient();
+
+//   const {
+//     data: { user },
+//   } = await supabase.auth.getUser();
+
+//   if (!user) return null;
+
+//   const { data: employee } = await supabase
+//     .from("employees")
+//     .select("role, full_name")
+//     .eq("id", user.id)
+//     .single();
+
+//   return {
+//     ...user,
+//     role: employee?.role || "user",
+//     full_name: employee?.full_name,
+//   };
+// }
+
+import { AccessError, requireActiveEmployee } from "@/lib/access";
 
 export async function getUserWithRole() {
-  const supabase = createServerSupabaseClient();
+  try {
+    const { user, employee } = await requireActiveEmployee();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    return {
+      ...user,
+      role: employee.role,
+      full_name: employee.full_name,
+    };
+  } catch (error) {
+    if (error instanceof AccessError) {
+      return null;
+    }
 
-  if (!user) return null;
-
-  const { data: employee } = await supabase
-    .from("employees")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .single();
-
-  return {
-    ...user,
-    role: employee?.role || "user",
-    full_name: employee?.full_name,
-  };
+    throw error;
+  }
 }

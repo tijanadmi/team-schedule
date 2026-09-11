@@ -1,5 +1,7 @@
-import { supabase } from "./supabase";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+// import { supabase } from "./supabase";
+// import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+import { requireActiveEmployee } from "@/lib/access";
 
 /*
 Funkcija za filtriranje zaposlenih koji su aktivni u datom mesecu.
@@ -35,6 +37,8 @@ function filterEmployeesForMonth(query, year, month) {
 
 // Dohvati sve zaposlene
 export async function getEmployees() {
+  const { supabase } = await requireActiveEmployee();
+
   const { data, error } = await supabase
     .from("employees")
     .select("*")
@@ -47,6 +51,8 @@ export async function getEmployees() {
 }
 
 export async function getStatuses() {
+  const { supabase } = await requireActiveEmployee();
+
   const { data, error } = await supabase
     .from("work_statuses")
     .select("*")
@@ -56,6 +62,8 @@ export async function getStatuses() {
 }
 
 export async function getScheduleForMonth(year, month) {
+  const { supabase } = await requireActiveEmployee();
+
   const dim = new Date(year, month, 0).getDate();
   const start = `${year}-${String(month).padStart(2, "0")}-01`;
   const end = `${year}-${String(month).padStart(2, "0")}-${dim}`;
@@ -68,28 +76,39 @@ export async function getScheduleForMonth(year, month) {
   return data;
 }
 
+// export async function getCurrentUserWithRole() {
+//   const supabase = createServerSupabaseClient();
+
+//   const {
+//     data: { user },
+//   } = await supabase.auth.getUser();
+
+//   if (!user) return null;
+
+//   const { data: employee, error } = await supabase
+//     .from("employees")
+//     .select("id, role, manager_id")
+//     .eq("id", user.id)
+//     .neq("role", "gle") // filtrira sve osim gde je role = "gle"
+//     .single();
+
+//   if (error) throw new Error("Ne mogu da učitam zaposlenog.");
+
+//   return employee;
+// }
+
 export async function getCurrentUserWithRole() {
-  const supabase = createServerSupabaseClient();
+  const { employee } = await requireActiveEmployee();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  const { data: employee, error } = await supabase
-    .from("employees")
-    .select("id, role, manager_id")
-    .eq("id", user.id)
-    .neq("role", "gle") // filtrira sve osim gde je role = "gle"
-    .single();
-
-  if (error) throw new Error("Ne mogu da učitam zaposlenog.");
+  // Zadržavamo postojeće ponašanje za stranicu Izmeni.
+  if (employee.role === "gle") return null;
 
   return employee;
 }
 
 export async function getScheduleForMonthDashboard(year, month) {
+  const { supabase } = await requireActiveEmployee();
+
   const dim = new Date(year, month, 0).getDate();
   const start = `${year}-${String(month).padStart(2, "0")}-01`;
   const end = `${year}-${String(month).padStart(2, "0")}-${dim}`;
@@ -164,24 +183,26 @@ export async function getScheduleForMonthDashboard(year, month) {
 //   return data;
 // }
 export async function getEmployeesForCurrentUser(year, month) {
-  const supabase = createServerSupabaseClient();
+  // const supabase = createServerSupabaseClient();
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  // const {
+  //   data: { user },
+  //   error: authError,
+  // } = await supabase.auth.getUser();
 
-  if (authError || !user) return [];
+  // if (authError || !user) return [];
 
-  const { data: employee, error: empError } = await supabase
-    .from("employees")
-    .select("id, role")
-    .eq("id", user.id)
-    .single();
+  // const { data: employee, error: empError } = await supabase
+  //   .from("employees")
+  //   .select("id, role")
+  //   .eq("id", user.id)
+  //   .single();
 
-  if (empError || !employee) {
-    throw new Error("Ne mogu da učitam zaposlenog.");
-  }
+  // if (empError || !employee) {
+  //   throw new Error("Ne mogu da učitam zaposlenog.");
+  // }
+
+  const { supabase, user, employee } = await requireActiveEmployee();
 
   let query = supabase.from("employees").select("*");
 
@@ -210,6 +231,8 @@ export async function getEmployeesForCurrentUser(year, month) {
 }
 
 export async function getAuditForMonth(year, month) {
+  const { supabase } = await requireActiveEmployee();
+
   const dim = new Date(year, month, 0).getDate();
 
   const start = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -290,24 +313,26 @@ export async function getEmployeesByOrg(
   month,
   { includeOutsideEmployment = false } = {},
 ) {
-  const supabase = createServerSupabaseClient();
+  // const supabase = createServerSupabaseClient();
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  // const {
+  //   data: { user },
+  //   error: authError,
+  // } = await supabase.auth.getUser();
 
-  if (authError || !user) return [];
+  // if (authError || !user) return [];
 
-  const { data: employee, error: empError } = await supabase
-    .from("employees")
-    .select("id, role, org")
-    .eq("id", user.id)
-    .single();
+  // const { data: employee, error: empError } = await supabase
+  //   .from("employees")
+  //   .select("id, role, org")
+  //   .eq("id", user.id)
+  //   .single();
 
-  if (empError || !employee) {
-    throw new Error("Ne mogu da učitam zaposlenog.");
-  }
+  // if (empError || !employee) {
+  //   throw new Error("Ne mogu da učitam zaposlenog.");
+  // }
+
+  const { supabase, employee } = await requireActiveEmployee();
 
   let query = supabase.from("employees").select("*").neq("role", "gle");
 

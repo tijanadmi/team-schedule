@@ -10,10 +10,27 @@ import {
   getScheduleForMonthDashboard,
 } from "@/lib/data-service";
 import { daysInMonth } from "@/lib/calendar";
+import { AccessError, requireActiveEmployee } from "@/lib/access";
 
 const daysOfWeek = ["Нед.", "Пон.", "Уто.", "Сре.", "Чет.", "Пет.", "Суб."];
 
 export async function GET(request, { params }) {
+  try {
+    await requireActiveEmployee();
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof AccessError
+            ? error.message
+            : "Не могу да проверим право приступа.",
+      },
+      {
+        status: error instanceof AccessError ? error.status : 500,
+      },
+    );
+  }
+
   const year = Number(params.year);
   const month = Number(params.month);
 
