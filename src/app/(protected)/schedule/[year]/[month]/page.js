@@ -1,7 +1,7 @@
 // src/app/(protected)/schedule/[year]/[month]/page.js
 import Layout from "@/components/Layout";
 import Link from "next/link";
-import { daysInMonth, prevNext } from "@/lib/calendar";
+import { /*daysInMonth,*/ prevNext } from "@/lib/calendar";
 import { isEmployedOnDate } from "@/lib/employment";
 import {
   getEmployeesForCurrentUser,
@@ -12,6 +12,9 @@ import {
 import { StatusSelect } from "@/components/StatusSelect";
 import ScheduleScrollContainer from "@/components/ScheduleScrollContainer";
 
+import { getWorkCalendar } from "@/lib/work-calendar-service";
+import { buildCalendarDays } from "@/lib/work-calendar";
+
 export const revalidate = 0;
 
 const daysOfWeek = ["Нед.", "Пон.", "Уто.", "Сре.", "Чет.", "Пет.", "Суб."];
@@ -20,8 +23,8 @@ export default async function SchedulePage({ params }) {
   const year = Number(params.year);
   const month = Number(params.month);
 
-  const dim = daysInMonth(year, month);
-  const days = Array.from({ length: dim }, (_, i) => i + 1);
+  // const dim = daysInMonth(year, month);
+  // const days = Array.from({ length: dim }, (_, i) => i + 1);
   const { prev, next } = prevNext(year, month);
 
   const monthLabel = new Date(year, month - 1).toLocaleDateString("sr-RS", {
@@ -29,12 +32,21 @@ export default async function SchedulePage({ params }) {
     year: "numeric",
   });
 
-  const [employees = [], statuses = [], schedule = []] = await Promise.all([
-    // getEmployeesForCurrentUser().catch(() => []),
-    getEmployeesForCurrentUser(year, month),
-    getStatuses().catch(() => []),
-    getScheduleForMonth(year, month).catch(() => []),
-  ]);
+  // const [employees = [], statuses = [], schedule = []] = await Promise.all([
+  //   getEmployeesForCurrentUser(year, month),
+  //   getStatuses().catch(() => []),
+  //   getScheduleForMonth(year, month).catch(() => []),
+  // ]);
+
+  const [employees = [], statuses = [], schedule = [], workCalendar] =
+    await Promise.all([
+      getEmployeesForCurrentUser(year, month),
+      getStatuses(),
+      getScheduleForMonth(year, month),
+      getWorkCalendar(year, month),
+    ]);
+
+  const calendarDays = buildCalendarDays(year, month, workCalendar.holidays);
 
   const currentUser = await getCurrentUserWithRole();
   if (!currentUser)
@@ -54,6 +66,15 @@ export default async function SchedulePage({ params }) {
   return (
     <Layout>
       <section className="bg-gray-100 text-gray-800  px-4 sm:px-6 lg:px-8">
+        {!workCalendar.confirmed && (
+          <p
+            role="status"
+            className="mb-4 rounded bg-amber-100 p-3 text-sm text-amber-900"
+          >
+            Календар за овај месец није потврђен. Преглед је доступан, али је
+            унос статуса онемогућен до потврде администратора.
+          </p>
+        )}
         {/* HEADER */}
         <div className="flex items-center justify-between mb-4 mt-4 sm:mt-6 w-full px-1 sm:px-2">
           <Link
@@ -87,25 +108,21 @@ export default async function SchedulePage({ params }) {
                   Запослени
                 </th>
 
-                {days.map((d) => {
-                  const dayOfWeek = new Date(year, month - 1, d).getDay();
-                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-                  return (
-                    <th
-                      key={d}
-                      className="border px-1 sm:px-2 py-1 sm:py-2 text-center text-xs sm:text-sm"
-                      style={{
-                        backgroundColor: isWeekend ? "#f0f0f0" : "white",
-                      }}
-                    >
-                      <div className="font-medium">{d}</div>
-                      <div className="text-[10px] sm:text-xs font-light">
-                        {daysOfWeek[dayOfWeek]}
-                      </div>
-                    </th>
-                  );
-                })}
+                {calendarDays.map((dayInfo) => (
+                  <th
+                    key={dayInfo.day}
+                    className="border px-1 sm:px-2 py-1 sm:py-2 text-center text-xs sm:text-sm"
+                    style={{
+                      backgroundColor: dayInfo.backgroundColor || "white",
+                    }}
+                    title={dayInfo.reason || undefined}
+                  >
+                    <div className="font-medium">{dayInfo.day}</div>
+                    <div className="text-[10px] sm:text-xs font-light">
+                      {daysOfWeek[dayInfo.weekday]}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
 
@@ -116,22 +133,9 @@ export default async function SchedulePage({ params }) {
                     {emp.full_name}
                   </td>
 
-                  {days.map((d) => {
-                    const date = `${year}-${String(month).padStart(
-                      2,
-                      "0",
-                    )}-${String(d).padStart(2, "0")}`;
-
-                    const key = `${emp.id}-${date}`;
-                    const value = scheduleMap.get(key) ?? null;
-
-                    /* stari kod */
-                    {
-                      /* const canEdit =
-                      emp.id === currentUserId ||
-                      emp.manager_id === currentUserId ||
-                      currentUserRole === "admin"; */
-                    }
+                  {calendarDays.map((dayInfo) => {
+                    const date = dayInfo.date;
+                    const value = scheduleMap.get(`${emp.id}-${date}`) ?? null;
 
                     const isEmployed = isEmployedOnDate(emp, date);
 
@@ -140,32 +144,40 @@ export default async function SchedulePage({ params }) {
                       emp.manager_id === currentUserId ||
                       currentUserRole === "admin";
 
-                    const canEdit = hasEditPermission && isEmployed;
+                    const canEdit =
+                      hasEditPermission &&
+                      isEmployed &&
+                      workCalendar.confirmed &&
+                      !dayInfo.isNonWorking;
 
-                    const dayOfWeek = new Date(year, month - 1, d).getDay();
-                    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                    const existingOnNonWorkingDay =
+                      dayInfo.isNonWorking && value !== null;
+
+                    const explanation = [
+                      dayInfo.reason,
+                      !isEmployed
+                        ? "Запослени није у радном односу на овај датум."
+                        : "",
+                      !workCalendar.confirmed
+                        ? "Календар месеца није потврђен."
+                        : "",
+                      existingOnNonWorkingDay
+                        ? "Постојећи статус на нерадном дану — потребна је провера."
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" — ");
 
                     return (
                       <td
-                        key={d}
+                        key={dayInfo.day}
                         className="border px-1 sm:px-2 py-1 sm:py-2 text-center text-xs sm:text-sm"
-                        // style={{
-                        //   backgroundColor: isWeekend
-                        //     ? "#f0f0f0"
-                        //     : "transparent",
-                        // }}
                         style={{
                           backgroundColor: !isEmployed
                             ? "#e5e7eb"
-                            : isWeekend
-                              ? "#f0f0f0"
-                              : "transparent",
+                            : dayInfo.backgroundColor || "transparent",
                         }}
-                        title={
-                          !isEmployed
-                            ? "Запослени није у радном односу на овај датум."
-                            : undefined
-                        }
+                        title={explanation || undefined}
                       >
                         <StatusSelect
                           employeeId={emp.id}
@@ -174,6 +186,16 @@ export default async function SchedulePage({ params }) {
                           statuses={statuses}
                           canEdit={canEdit}
                         />
+
+                        {existingOnNonWorkingDay && (
+                          <span
+                            className="text-amber-800"
+                            aria-label="Постојећи статус на нерадном дану"
+                          >
+                            {" "}
+                            ⚠
+                          </span>
+                        )}
                       </td>
                     );
                   })}

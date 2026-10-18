@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-export default function AuditCell({ history, backgroundColor, label, code }) {
+export default function AuditCell({
+  history,
+  backgroundColor,
+  label,
+  code,
+  dayNote = "",
+}) {
   const [open, setOpen] = useState(false);
 
   const historyText = history
@@ -24,7 +30,7 @@ ${h.old_status_label || "-"} → ${h.new_status_label || "-"}`;
     <>
       <td
         onClick={() => history.length && setOpen(true)}
-        title={historyText}
+        title={[dayNote, historyText].filter(Boolean).join("\n\n")}
         className="border w-[60px] px-1.5 py-[4px] text-center text-[10px] leading-tight cursor-pointer"
         style={{ backgroundColor }}
       >

@@ -2,14 +2,17 @@
 import Layout from "@/components/Layout";
 import AuditCell from "@/components/AuditCell";
 import Link from "next/link";
-import { daysInMonth, prevNext } from "@/lib/calendar";
-import { isEmployedOnDate } from "@/lib/employment";
+import { prevNext } from "@/lib/calendar";
+// import { isEmployedOnDate } from "@/lib/employment";
 import {
   getEmployeesByOrg,
   getStatuses,
   getScheduleForMonthDashboard,
   getAuditForMonth,
 } from "@/lib/data-service";
+
+import { getWorkCalendar } from "@/lib/work-calendar-service";
+import { buildCalendarDays, calculateRemotePercent } from "@/lib/work-calendar";
 
 // export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -22,8 +25,8 @@ export default async function AuditMonthPage({ params }) {
   const year = params?.year ? Number(params.year) : now.getFullYear();
   const month = params?.month ? Number(params.month) : now.getMonth() + 1;
 
-  const dim = daysInMonth(year, month);
-  const days = Array.from({ length: dim }, (_, i) => i + 1);
+  // const dim = daysInMonth(year, month);
+  // const days = Array.from({ length: dim }, (_, i) => i + 1);
   const { prev, next } = prevNext(year, month);
 
   const monthLabel = new Date(year, month - 1).toLocaleDateString("sr-RS", {
@@ -31,13 +34,29 @@ export default async function AuditMonthPage({ params }) {
     year: "numeric",
   });
 
-  const [employees = [], statuses = [], schedule = [], audit = []] =
-    await Promise.all([
-      getEmployeesByOrg(year, month),
-      getStatuses(),
-      getScheduleForMonthDashboard(year, month),
-      getAuditForMonth(year, month),
-    ]);
+  // const [employees = [], statuses = [], schedule = [], audit = []] =
+  //   await Promise.all([
+  //     getEmployeesByOrg(year, month),
+  //     getStatuses(),
+  //     getScheduleForMonthDashboard(year, month),
+  //     getAuditForMonth(year, month),
+  //   ]);
+
+  const [
+    employees = [],
+    statuses = [],
+    schedule = [],
+    audit = [],
+    workCalendar,
+  ] = await Promise.all([
+    getEmployeesByOrg(year, month),
+    getStatuses(),
+    getScheduleForMonthDashboard(year, month),
+    getAuditForMonth(year, month),
+    getWorkCalendar(year, month),
+  ]);
+
+  const calendarDays = buildCalendarDays(year, month, workCalendar.holidays);
 
   employees.sort((a, b) => a.org.localeCompare(b.org));
 
@@ -71,29 +90,15 @@ export default async function AuditMonthPage({ params }) {
 
   /*****dodavanje dela za procenat */
   // Dnevni procenat rada od kuće među zaposlenima na taj datum.
-  const workFromHomePercent = {};
+  // const workFromHomePercent = {};
+  const workFromHomePercent = calculateRemotePercent(
+    employees,
+    statusMap,
+    scheduleMap,
+    calendarDays,
+    workCalendar.confirmed,
+  );
 
-  days.forEach((d) => {
-    const date = `${year}-${String(month).padStart(2, "0")}-${String(
-      d,
-    ).padStart(2, "0")}`;
-
-    const employeesForDay = employees.filter((emp) =>
-      isEmployedOnDate(emp, date),
-    );
-
-    const remoteCount = employeesForDay.reduce((count, emp) => {
-      const statusId = scheduleMap.get(`${emp.id}-${date}`);
-      const status = statusMap.get(statusId);
-
-      return count + (status?.code === "REMOTE" ? 1 : 0);
-    }, 0);
-
-    workFromHomePercent[d] =
-      employeesForDay.length > 0
-        ? Math.round((remoteCount / employeesForDay.length) * 100)
-        : 0;
-  });
   /****** kraj dela za procenat */
 
   return (
@@ -122,6 +127,15 @@ export default async function AuditMonthPage({ params }) {
           </Link>
         </div>
 
+        {!workCalendar.confirmed && (
+          <p className="mb-3 rounded bg-amber-100 p-3 text-sm text-amber-900">
+            Календар месеца није потврђен. Подаци су приказани за преглед, а
+            проценти се не обрачунавају до потврде.
+          </p>
+        )}
+
+        {/* TABLE WRAPPER */}
+
         {/* TABLE WRAPPER */}
         <div className="w-full overflow-x-auto max-h-[70vh] border border-gray-200 rounded-md m-0">
           <table className="min-w-[1200px] table-fixed border-collapse text-sm">
@@ -130,26 +144,21 @@ export default async function AuditMonthPage({ params }) {
                 <th className="sticky left-0 bg-gray-50 border w-[200px] text-center text-blue-800 z-30 text-sm sm:text-sm">
                   Запослени
                 </th>
-                {days.map((d) => {
-                  const dayOfWeek = new Date(year, month - 1, d).getDay();
-                  return (
-                    <th
-                      key={d}
-                      className="border px-2 sm:px-2 py-1 sm:py-2 text-center min-w-[28px] sm:min-w-[32px] text-[10px] sm:text-xs"
-                      style={{
-                        backgroundColor:
-                          dayOfWeek === 0 || dayOfWeek === 6
-                            ? "#f0f0f0"
-                            : "white",
-                      }}
-                    >
-                      <div className="font-medium">{d}</div>
-                      <div className="text-[9px] sm:text-[10px] font-light">
-                        {daysOfWeek[dayOfWeek]}
-                      </div>
-                    </th>
-                  );
-                })}
+                {calendarDays.map((dayInfo) => (
+                  <th
+                    key={dayInfo.day}
+                    className="border px-2 py-1 sm:py-2 text-center min-w-[28px] sm:min-w-[32px] text-[10px] sm:text-xs"
+                    style={{
+                      backgroundColor: dayInfo.backgroundColor || "white",
+                    }}
+                    title={dayInfo.reason || undefined}
+                  >
+                    <div className="font-medium">{dayInfo.day}</div>
+                    <div className="text-[9px] sm:text-[10px] font-light">
+                      {daysOfWeek[dayInfo.weekday]}
+                    </div>
+                  </th>
+                ))}
               </tr>
               {/* /**** dodavanje reda za procente *** */}
               <tr>
@@ -157,22 +166,27 @@ export default async function AuditMonthPage({ params }) {
                   % Рад од куће
                 </th>
 
-                {days.map((d) => {
-                  const dayOfWeek = new Date(year, month - 1, d).getDay();
-                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                {calendarDays.map((dayInfo) => {
+                  const percent = workFromHomePercent[dayInfo.day];
 
                   return (
                     <th
-                      key={`percent-${d}`}
-                      className={`border text-center text-xs font-medium ${
-                        isWeekend
-                          ? "bg-gray-100"
-                          : workFromHomePercent[d] > 30
-                            ? "bg-red-200"
-                            : "bg-gray-50"
-                      }`}
+                      key={`percent-${dayInfo.day}`}
+                      className="border text-center text-xs font-medium"
+                      style={{
+                        backgroundColor:
+                          dayInfo.backgroundColor ||
+                          (percent !== null && percent > 30
+                            ? "#fecaca"
+                            : "#f9fafb"),
+                      }}
+                      title={
+                        !workCalendar.confirmed
+                          ? "Календар месеца није потврђен."
+                          : dayInfo.reason || undefined
+                      }
                     >
-                      {isWeekend ? "" : `${workFromHomePercent[d]}%`}
+                      {percent === null ? "—" : `${percent}%`}
                     </th>
                   );
                 })}
@@ -190,24 +204,32 @@ export default async function AuditMonthPage({ params }) {
                   <td className="sticky left-0 bg-gray-50 border w-[90px] min-w-[90px] max-w-[90px] px-0.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-[11px] font-medium text-left text-blue-800 group-hover:bg-blue-100">
                     {emp.full_name}
                   </td>
-                  {days.map((d) => {
-                    const date = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-                    const statusId = scheduleMap.get(`${emp.id}-${date}`);
-                    const history = auditMap.get(`${emp.id}-${date}`) || [];
+                  {calendarDays.map((dayInfo) => {
+                    const key = `${emp.id}-${dayInfo.date}`;
+
+                    const statusId = scheduleMap.get(key);
                     const status = statusMap.get(statusId);
-                    const dayOfWeek = new Date(year, month - 1, d).getDay();
+                    const history = auditMap.get(key) || [];
+
+                    const warning =
+                      dayInfo.isNonWorking && statusId != null
+                        ? "Постојећи статус на нерадном дану — потребна је провера."
+                        : "";
 
                     return (
                       <AuditCell
-                        key={d}
+                        key={dayInfo.day}
                         history={history}
                         backgroundColor={
-                          dayOfWeek === 0 || dayOfWeek === 6
-                            ? "#f0f0f0"
-                            : status?.color_hex || "transparent"
+                          dayInfo.backgroundColor ||
+                          status?.color_hex ||
+                          "transparent"
                         }
-                        label={status?.label || ""}
-                        code={status?.code_sr || ""}
+                        label={`${status?.label || ""}${warning ? " ⚠" : ""}`}
+                        code={`${status?.code_sr || ""}${warning ? " ⚠" : ""}`}
+                        dayNote={[dayInfo.reason, warning]
+                          .filter(Boolean)
+                          .join(" — ")}
                       />
                     );
                   })}

@@ -30,6 +30,14 @@ export default function Navigation({ onLinkClick, user = null }) {
       href: `/dashboard/${currentYear}/${currentMonth}`,
       label: "Почетна",
     },
+    ...(user.role === "admin"
+      ? [
+          {
+            href: "/admin/non-working-days",
+            label: "Нерадни дани",
+          },
+        ]
+      : []),
   ];
 
   return (

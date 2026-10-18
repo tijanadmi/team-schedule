@@ -4,6 +4,9 @@ import { createActionSupabaseClient } from "@/lib/supabase/action";
 import { isEmployedOnDate } from "@/lib/employment";
 import { requireActiveEmployee } from "@/lib/access";
 
+import { getWorkCalendar } from "@/lib/work-calendar-service";
+import { buildCalendarDays } from "@/lib/work-calendar";
+
 export async function updateWorkStatus(employeeId, date, statusId) {
   // Datum mora biti stvaran kalendarski datum u formatu YYYY-MM-DD.
   if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -97,6 +100,30 @@ export async function updateWorkStatus(employeeId, date, statusId) {
   // Novi upisi i izmene dozvoljeni su samo tokom zaposlenja.
   if (!isEmployedOnDate(employee, date)) {
     throw new Error("Није дозвољен унос статуса ван периода запослења.");
+  }
+
+  const [year, month, day] = date.split("-").map(Number);
+
+  const workCalendar = await getWorkCalendar(year, month);
+
+  if (!workCalendar.confirmed) {
+    throw new Error(
+      "Календар месеца није потврђен. Унос статуса није дозвољен.",
+    );
+  }
+
+  const calendarDays = buildCalendarDays(year, month, workCalendar.holidays);
+
+  const dayInfo = calendarDays[day - 1];
+
+  if (!dayInfo || dayInfo.date !== date) {
+    throw new Error("Неисправан датум.");
+  }
+
+  if (dayInfo.isNonWorking) {
+    throw new Error(
+      "Није дозвољен унос статуса суботом, недељом или празником.",
+    );
   }
 
   const { error } = await supabase.from("work_schedule").upsert(

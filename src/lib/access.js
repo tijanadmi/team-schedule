@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { cache } from "react";
 
 export class AccessError extends Error {
   constructor(message, status = 403) {
@@ -23,18 +24,45 @@ function getTodayInBelgrade() {
   return `${getPart("year")}-${getPart("month")}-${getPart("day")}`;
 }
 
-export async function requireActiveEmployee(
-  supabase = createServerSupabaseClient(),
-) {
+// export async function requireActiveEmployee(
+//   supabase = createServerSupabaseClient(),
+// ) {
+async function checkActiveEmployee(supabase) {
   const {
     data: { user },
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    throw new AccessError("Морате бити пријављени.", 401);
+  // if (authError || !user) {
+  //   throw new AccessError("Морате бити пријављени.", 401);
+  // }
+
+  if (authError) {
+    if (
+      authError.status === 429 ||
+      authError.code === "over_request_rate_limit"
+    ) {
+      throw new Error(
+        "Превише захтева за проверу пријаве. Сачекајте мало, па покушајте поново.",
+      );
+    }
+
+    if (
+      authError.name === "AuthSessionMissingError" ||
+      authError.status === 401 ||
+      authError.status === 403
+    ) {
+      throw new AccessError("Морате бити пријављени.", 401);
+    }
+
+    throw new Error(
+      "Провера пријаве тренутно није доступна. Покушајте поново касније.",
+    );
   }
 
+  if (!user) {
+    throw new AccessError("Морате бити пријављени.", 401);
+  }
   const { data: employee, error } = await supabase
     .from("employees")
     .select(
@@ -58,4 +86,19 @@ export async function requireActiveEmployee(
   }
 
   return { supabase, user, employee };
+}
+
+const getActiveEmployeeForRender = cache(async () => {
+  const supabase = createServerSupabaseClient();
+  return checkActiveEmployee(supabase);
+});
+
+export async function requireActiveEmployee(supabase) {
+  // Eksplicitni klijent koriste prijava i serverske akcije.
+  if (supabase) {
+    return checkActiveEmployee(supabase);
+  }
+
+  // Servisi tokom istog prikaza stranice dele jednu proveru.
+  return getActiveEmployeeForRender();
 }
