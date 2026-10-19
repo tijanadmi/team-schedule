@@ -13,11 +13,15 @@ import {
 import { getWorkCalendar } from "@/lib/work-calendar-service";
 import { buildCalendarDays, calculateRemotePercent } from "@/lib/work-calendar";
 
+import { requirePageAccess } from "@/lib/page-access";
+
 export const revalidate = 0;
 
 const daysOfWeek = ["Нед.", "Пон.", "Уто.", "Сре.", "Чет.", "Пет.", "Суб."];
 
 export default async function DashboardMonthPage({ params }) {
+
+  await requirePageAccess();
   const now = new Date();
   const year = params?.year ? Number(params.year) : now.getFullYear();
   const month = params?.month ? Number(params.month) : now.getMonth() + 1;

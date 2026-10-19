@@ -38,6 +38,12 @@ async function checkActiveEmployee(supabase) {
   // }
 
   if (authError) {
+    console.warn("Provera prijave nije uspela:", {
+      name: authError.name,
+      status: authError.status,
+      code: authError.code,
+    });
+
     if (
       authError.status === 429 ||
       authError.code === "over_request_rate_limit"
@@ -61,6 +67,8 @@ async function checkActiveEmployee(supabase) {
   }
 
   if (!user) {
+    console.warn("Provera prijave nije vratila korisnika.");
+
     throw new AccessError("Морате бити пријављени.", 401);
   }
   const { data: employee, error } = await supabase

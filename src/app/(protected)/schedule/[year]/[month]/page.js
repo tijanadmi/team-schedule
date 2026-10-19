@@ -15,11 +15,14 @@ import ScheduleScrollContainer from "@/components/ScheduleScrollContainer";
 import { getWorkCalendar } from "@/lib/work-calendar-service";
 import { buildCalendarDays } from "@/lib/work-calendar";
 
+import { requirePageAccess } from "@/lib/page-access";
+
 export const revalidate = 0;
 
 const daysOfWeek = ["Нед.", "Пон.", "Уто.", "Сре.", "Чет.", "Пет.", "Суб."];
 
 export default async function SchedulePage({ params }) {
+  await requirePageAccess();
   const year = Number(params.year);
   const month = Number(params.month);
 
